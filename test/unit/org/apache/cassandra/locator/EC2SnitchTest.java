@@ -62,6 +62,11 @@ public class EC2SnitchTest
             super();
         }
 
+        public TestEC2Snitch(SnitchProperties props) throws IOException, ConfigurationException
+        {
+            super(props);
+        }
+
         @Override
         String awsApiCall(String url) throws IOException, ConfigurationException
         {
@@ -98,6 +103,32 @@ public class EC2SnitchTest
         InetAddress local = InetAddress.getByName("127.0.0.1");
         assertEquals("us-east-2", snitch.getDatacenter(local));
         assertEquals("2d", snitch.getRack(local));
+    }
+
+    @Test
+    public void testFullNamingScheme() throws IOException, ConfigurationException
+    {
+        InetAddress local = InetAddress.getByName("127.0.0.1");
+
+        SnitchProperties props = new SnitchProperties()
+        {
+            public String get(String propertyName, String defaultValue)
+            {
+                return propertyName.equals("ec2_naming_scheme") ? "full" : super.get(propertyName, defaultValue);
+            }
+        };
+
+        az = "us-east-2d";
+        Ec2Snitch snitch = new TestEC2Snitch(props);
+
+        assertEquals("us-east-2", snitch.getDatacenter(local));
+        assertEquals("us-east-2d", snitch.getRack(local));
+
+        az = "us-west-1a";
+        snitch = new TestEC2Snitch(props);
+
+        assertEquals("us-west-1", snitch.getDatacenter(local));
+        assertEquals("us-west-1a", snitch.getRack(local));
     }
 
     @Test
