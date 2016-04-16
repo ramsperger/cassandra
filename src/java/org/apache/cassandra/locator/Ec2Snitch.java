@@ -61,12 +61,7 @@ public class Ec2Snitch extends AbstractNetworkTopologySnitch
 
         // if using the full naming scheme, region name is created by removing letters from the 
         // end of the availability zone and zone is the full zone name 
-        if (props.get("ec2_naming_scheme", "legacy").equalsIgnoreCase("full"))
-        {
-            ec2region = az.replaceFirst("[a-z]+$","");
-            ec2zone = az;
-        }
-        else
+        if (props.get("ec2_naming_scheme", "standard").equalsIgnoreCase("legacy"))
         {
             // legacy
             // Split "us-east-1a" or "asia-1a" into "us-east"/"1a" and "asia"/"1a".
@@ -77,6 +72,11 @@ public class Ec2Snitch extends AbstractNetworkTopologySnitch
             ec2region = az.substring(0, az.length() - 1);
             if (ec2region.endsWith("1"))
                 ec2region = az.substring(0, az.length() - 3);
+        }
+        else
+        {
+            ec2region = az.replaceFirst("[a-z]+$","");
+            ec2zone = az;
         }
 
         String datacenterSuffix = props.get("dc_suffix", "");
